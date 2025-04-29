@@ -520,24 +520,12 @@ class OfflineConverter(QObject):
 
     def _export_basemap_requirements_check(self) -> bool:
         try:
-            # NOTE if qgis is built without GUI, there is no `qgis.utils`, since it depends on `qgis.gui`
-            import qgis.utils
-
-            # TODO investigate why starPlugin fails in docker
-            # print(1111111111010301, qgis.utils.loadPlugin("processing"))
-            # print(1111111111010302, qgis.utils.startPlugin("processing"))
-
-            if "processing" in qgis.utils.plugins:
-                return True
-
-            self.warning.emit(
-                self.tr('QFieldSync requires "processing" plugin'),
-                self.tr(
-                    "Creating a basemap with QFieldSync requires the processing plugin to be enabled. Processing is not enabled on your system. Please go to Plugins > Manage and Install Plugins and enable processing."
-                ),
-            )
-            self.total_progress_updated.emit(0, 0, self.trUtf8("Cancelled"))
-        except Exception:
+            import processing
+            from processing.core.Processing import Processing
+            Processing.initialize()
+            return True
+        except Exception as e:
+            logger.error(e)
             pass
 
         return False
